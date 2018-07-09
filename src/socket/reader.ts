@@ -53,8 +53,14 @@ export class WebSocketMessageReader extends AbstractMessageReader {
         if (this.state === 'initial') {
             this.events.splice(0, 0, { message });
         } else if (this.state === 'listening') {
-            const data = JSON.parse(message);
-            this.callback!(data);
+            if (message instanceof Blob) {
+                const reader = new FileReader();
+                reader.onload = () => this.callback!(JSON.parse(reader.result));
+                reader.readAsText(message);
+            } else {
+                const data = JSON.parse(message);
+                this.callback!(data);
+            }
         }
     }
 
